@@ -21,11 +21,17 @@ class ClassController {
    */
   async index ({ request }) {
     const { page, size } = request.pagination;
+    const { school_id } = request.get()
 
-    const classObj = await Class.query()
+    const classObj = Class.query();
+
+    if (school_id) {
+      classObj.where("school_id", school_id);
+    }
+
+    return classObj
+      .with("school")
       .paginate(page, size);
-
-    return classObj;
   }
 
   /**
@@ -89,12 +95,14 @@ class ClassController {
   async update ({ params, request, response }) {
     try {
       const { id } = params;
-      const { name, school_id } = request.all();
+      const newClass = request.all();
 
-      const school = await School.find(school_id);
-
-      if (!school) {
-        return response.notFound();
+      if (newClass.school_id) {
+        const school = await School.find(newClass.school_id);
+  
+        if (!school) {
+          return response.notFound();
+        }
       }
 
       const classObj = await Class.find(id);
@@ -103,7 +111,7 @@ class ClassController {
         return response.notFound();
       }
 
-      classObj.merge({ name, school_id });
+      classObj.merge(newClass);
       await classObj.save();
 
       return classObj;

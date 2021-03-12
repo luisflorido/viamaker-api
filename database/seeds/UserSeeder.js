@@ -19,7 +19,7 @@ class UserSeeder {
     const admin = new User()
     admin.username = 'Luis'
     admin.email = 'admin@admin.com'
-    admin.password = 'admin'
+    admin.password = '12345678'
     await admin.save();
   }
 }
